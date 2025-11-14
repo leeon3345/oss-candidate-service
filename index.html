@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4가지 프로젝트 아키텍처 상세 구조</title>
+    <style>
+        :root {
+            --bg-color: #0d0d0d;
+            --surface-1: #1a1a1a;
+            --surface-2: #2c2c2c;
+            --border-color-1: #333;
+            --border-color-2: #444;
+            --text-color-primary: #f0f0f0;
+            --text-color-secondary: #a0a0a0;
+            --text-color-tertiary: #666;
+            --accent-color: #ffffff;
+
+            --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 20px;
+            --spacing-xl: 40px;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-color);
+            color: var(--text-color-primary);
+            line-height: 1.6;
+            padding: var(--spacing-xl) var(--spacing-lg);
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 42px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 80px;
+            color: var(--accent-color);
+        }
+        .summary-section {
+            margin-bottom: 60px;
+            text-align: center;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
+        }
+        .summary-grid a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .summary-item {
+            background: var(--surface-1);
+            border: 1px solid var(--border-color-1);
+            border-radius: 6px;
+            padding: var(--spacing-lg);
+            transition: all 0.3s ease;
+        }
+        .summary-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+        }
+        .summary-item h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color-primary);
+            margin-bottom: 10px;
+        }
+        .project-section {
+            margin-bottom: 80px;
+            border: 2px solid var(--border-color-1);
+            border-radius: 8px;
+            padding: var(--spacing-xl);
+            background: #000;
+        }
+        .project-header {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #ffffff;
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 15px;
+        }
+        .project-subtitle {
+            font-size: 16px;
+            color: var(--text-color-secondary);
+            margin-bottom: 30px;
+        }
+        .architecture-flow {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+        }
+        .layer {
+            background: var(--surface-1);
+            border: 1px solid var(--border-color-1);
+            border-radius: 6px;
+            padding: var(--spacing-lg);
+        }
+        .layer-title {
+            font-size: 14px;
+            color: var(--text-color-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .components {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .component {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color-2);
+            border-radius: 4px;
+            padding: 15px;
+            transition: all 0.3s;
+        }
+        .component:hover {
+            border-color: #ffffff;
+            transform: translateY(-2px);
+        }
+        .component-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-color-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+        .component-desc {
+            font-size: 13px;
+            color: var(--text-color-secondary);
+            line-height: 1.5;
+        }
+        .component-tech {
+            font-size: 12px;
+            color: var(--text-color-tertiary);
+            margin-top: var(--spacing-sm);
+            font-style: italic;
+        }
+        .arrow-down {
+            text-align: center;
+            font-size: 24px;
+            color: var(--text-color-tertiary);
+            margin: 10px 0;
+        }
+        .arrow-down-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-color-secondary);
+        }
+        .flow-description {
+            background: var(--surface-1);
+            border-left: 4px solid var(--accent-color);
+            padding: 15px 20px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: var(--text-color-primary);
+        }
+        .info-box {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .info-item {
+            background: var(--surface-1);
+            border: 1px solid var(--border-color-1);
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .info-label {
+            font-size: 12px;
+            color: var(--text-color-secondary);
+            margin-bottom: 5px;
+        }
+        .info-value {
+            font-size: 16px;
+            color: var(--text-color-primary);
+            font-weight: 600;
+        }
+        .team-roles {
+            margin-top: 30px;
+            background: var(--surface-1);
+            border: 1px solid var(--border-color-1);
+            border-radius: 6px;
+            padding: var(--spacing-lg);
+        }
+        .role-title {
+            font-size: 18px;
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .role-item {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: var(--spacing-md);
+            margin-bottom: 12px;
+            padding: 10px;
+            background: var(--bg-color);
+            border-radius: 4px;
+            align-items: center;
+        }
+        .role-name {
+            font-weight: 600;
+            color: var(--text-color-primary);
+        }
+        .role-task {
+            color: var(--text-color-secondary);
+        }
+        .highlight {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+        .structure-summary {
+            margin-top: 30px;
+            padding: var(--spacing-lg);
+            background: var(--surface-1);
+            border-left: 4px solid var(--accent-color);
+            border-radius: 0 4px 4px 0;
+            font-size: 14px;
+            color: var(--text-color-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 4가지 쿠버네티스 프로젝트 서비스 후보</h1>
+
+        <div class="summary-section">
+            <div class="summary-grid">
+                <a href="#project-1">
+                    <div class="summary-item">
+                        <h3>1. 간단한 웹 앱 배포</h3>
+                        <p class="component-desc">K8s 기본 개념 학습</p>
+                    </div>
+                </a>
+                <a href="#project-2">
+                    <div class="summary-item">
+                        <h3>2. MSA 쇼핑몰</h3>
+                        <p class="component-desc">서비스 간 통신 학습</p>
+                    </div>
+                </a>
+                <a href="#project-3">
+                    <div class="summary-item">
+                        <h3>3. CI/CD 자동화</h3>
+                        <p class="component-desc">DevOps 파이프라인 구축</p>
+                    </div>
+                </a>
+                <a href="#project-4">
+                    <div class="summary-item">
+                        <h3>4. AI Notion 연동</h3>
+                        <p class="component-desc">외부 API 연동 및 AI 활용</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 프로젝트 1 -->
+        <div class="project-section" id="project-1">
+            <div class="project-header">1. 간단한 웹 애플리케이션 배포 및 관리 시스템</div>
+            <div class="project-subtitle">여러 개의 독립적인 웹 서비스를 쿠버네티스로 통합 관리</div>
+            
+            <div class="architecture-flow">
+                <div class="layer">
+                    <div class="layer-title">Client Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">사용자</div>
+                            <div class="component-desc">웹 브라우저를 통해 각 서비스에 접근</div>
+                            <div class="component-tech">Chrome, Safari, Firefox</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arrow-down">
+                    <span class="arrow-down-label">↓</span>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">Kubernetes Orchestration Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">Ingress Controller</div>
+                            <div class="component-desc">외부 트래픽을 적절한 서비스로 라우팅</div>
+                            <div class="component-tech">Nginx Ingress</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-name">Service Discovery</div>
+                            <div class="component-desc">각 Pod의 IP 주소를 자동으로 관리</div>
+                            <div class="component-tech">K8s Service</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arrow-down">
+                    <span class="arrow-down-label">↓</span>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">Application Layer (독립 실행)</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">Flask Todo 앱</div>
+                            <div class="component-desc">할 일 관리 CRUD 기능</div>
+                            <div class="component-tech">Python Flask + SQLite</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-name">Node.js 날씨 앱</div>
+                            <div class="component-desc">실시간 날씨 정보 제공</div>
+                            <div class="component-tech">Express.js + OpenWeather API</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-name">Django 게시판</div>
+                            <div class="component-desc">글 작성, 댓글, 조회 기능</div>
+                            <div class="component-tech">Django + PostgreSQL</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-name">React 계산기</div>
+                            <div class="component-desc">프론트엔드 계산기 UI</div>
+                            <div class="component-tech">React + Nginx</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arrow-down">
+                    <span class="arrow-down-label">↓</span>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">Monitoring Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">Kubernetes Dashboard</div>
+                            <div class="component-desc">Pod 상태, 로그, 리소스 사용량 시각화</div>
+                            <div class="component-tech">K8s Dashboard / Grafana</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-name">Health Check</div>
+                            <div class="component-desc">각 서비스의 생존 여부 확인</div>
+                            <div class="component-tech">Liveness/Readiness Probe</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-description">
+                <strong>작동 흐름:</strong> 사용자 요청 → Ingress가 URL 분석 (/todo, /weather, /board) → 해당 Service로 라우팅 → Pod에서 처리 → 응답 반환
+            </div>
+
+            <div class="info-box">
+                <div class="info-item">
+                    <div class="info-label">학습 포인트</div>
+                    <div class="info-value">K8s 기본 개념</div>
+                </div>
+            </div>
+
+            <div class="team-roles">
+                <div class="role-title">👥 역할 분담</div>
+                <div class="role-item">
+                    <div class="role-name">A</div>
+                    <div class="role-task">웹 앱 개발 - Flask Todo, Node.js 날씨 앱 각 1개씩 담당</div>
+                </div>
+                <div class="role-item">
+                    <div class="role-name">B</div>
+                    <div class="role-task">쿠버네티스 설정 - Deployment, Service, Ingress YAML 작성 및 배포</div>
+                </div>
+                <div class="role-item">
+                    <div class="role-name">C</div>
+                    <div class="role-task">모니터링 - Dashboard 구축, 문서화, 발표 자료</div>
+                </div>
+            </div>
+
+            <div class="structure-summary">
+                <strong>전체 구조 요약:</strong> 단일 쿠버네티스 클러스터 내에 여러 독립적인 웹 애플리케이션을 배포하는 구조. Ingress 컨트롤러가 단일 진입점 역할을 하여 URL 경로에 따라 요청을 올바른 애플리케이션으로 라우팅. 각 앱은 자체 Pod와 Service를 가지며, 서비스 간 직접적인 통신은 없는 단순한 통합 환경.
+            </div>
+        </div>
+
+        <!-- 프로젝트 2 -->
+        <div class="project-section" id="project-2">
+            <div class="project-header">2. 마이크로서비스 기반 간단한 쇼핑몰</div>
+            <div class="project-subtitle">서비스 간 통신이 일어나는 실제 마이크로서비스 아키텍처</div>
+            
+            <div class="architecture-flow">
+                <div class="layer">
+                    <div class="layer-title">Client Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">웹 프론트엔드</div>
+                            <div class="component-desc">사용자 인터페이스 (HTML/CSS/JS)</div>
+                            <div class="component-tech">React or Vanilla JS</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arrow-down">
+                    <span class="arrow-down-label">↓</span>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">API Gateway Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">Nginx Ingress</div>
+                            <div class="component-desc">/products → 상품 서비스<br>/cart → 장바구니 서비스<br>/users → 사용자 서비스<br>/orders → 주문 서비스</div>
+                            <div class="component-tech">Path-based Routing</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arrow-down">
+                    <span class="arrow-down-label">↓</span>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">Microservices Layer (서비스 간 통신 발생)</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">상품 서비스</div>
+                            <div class="component-desc">• GET /products - 상품 목록<br>• GET /products/:id - 상품 상세<br>• 상품 DB 조회</div>
+                            <div class="component-tech">Node.js + MongoDB</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-name">장바구니 서비스</div>
+                            <div class="component-desc">• POST /cart/add - 담기<br>• DELETE /cart/:id - 삭제<br>• <span class="highlight">상품 서비스 호출</span> (가격 확인)</div>
+                            <div class="component-tech">Python Flask + Redis</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-name">사용자 서비스</div>
+                            <div class="component-desc">• POST /login - 로그인<br>• JWT 토큰 발급<br>• 인증 미들웨어 제공</div>
+                            <div class="component-tech">Express.js + PostgreSQL</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-name">주문 서비스</div>
+                            <div class="component-desc">• POST /orders - 주문 생성<br>• <span class="highlight">장바구니 서비스 호출</span><br>• <span class="highlight">상품 서비스 호출</span> (재고 확인)</div>
+                            <div class="component-tech">Django + MySQL</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arrow-down">
+                    <span class="arrow-down-label">↓</span>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">Data Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">각 서비스 전용 DB</div>
+                            <div class="component-desc">마이크로서비스 패턴: 서비스마다 독립적인 DB 사용</div>
+                            <div class="component-tech">MongoDB, Redis, PostgreSQL, MySQL</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-description">
+                <strong>작동 흐름 예시:</strong> 사용자가 "상품 A 주문" 클릭 → 주문 서비스가 장바구니 서비스에 장바구니 데이터 요청 → 상품 서비스에 재고 확인 → 주문 생성 → 사용자에게 응답
+            </div>
+
+            <div class="info-box">
+                <div class="info-item">
+                    <div class="info-label">학습 포인트</div>
+                    <div class="info-value">서비스 간 통신</div>
+                </div>
+            </div>
+
+            <div class="team-roles">
+                <div class="role-title">👥 역할 분담</div>
+                <div class="role-item">
+                    <div class="role-name">A</div>
+                    <div class="role-task">상품 + 장바구니 서비스 개발 (각 1명씩)</div>
+                </div>
+                <div class="role-item">
+                    <div class="role-name">B</div>
+                    <div class="role-task">사용자 + 주문 서비스 개발 (각 1명씩)</div>
+                </div>
+                <div class="role-item">
+                    <div class="role-name">C</div>
+                    <div class="role-task">Ingress 설정, 서비스 통합, 프론트엔드 간단 UI</div>
+                </div>
+            </div>
+
+            <div class="structure-summary">
+                <strong>전체 구조 요약:</strong> 각 기능(상품, 장바구니, 주문 등)이 독립된 서비스로 분리된 마이크로서비스 아키텍처(MSA). 서비스들은 각자의 Pod에서 실행되며, 필요시 쿠버네티스 내부 네트워크를 통해 서로 API를 호출하며 통신. 각 서비스는 독립적인 데이터베이스를 사용하여 데이터 종속성을 제거한 것이 특징.
+            </div>
+        </div>
+
+        <!-- 프로젝트 3 -->
+        <div class="project-section" id="project-3">
+            <div class="project-header">3. CI/CD 파이프라인 자동화 시스템</div>
+            <div class="project-subtitle">코드 푸시부터 배포까지 완전 자동화</div>
+            
+            <div class="architecture-flow">
+                <div class="layer">
+                    <div class="layer-title">Development Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">개발자 로컬 환경</div>
+                            <div class="component-desc">• 코드 작성 (VSCode)<br>• git add, commit<br>• git push origin main</div>
+                            <div class="component-tech">Git</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arrow-down">
+                    <span class="arrow-down-label">↓ Git Push</span>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">Source Control Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">GitHub Repository</div>
+                            <div class="component-desc">• 코드 저장소<br>• 브랜치 관리<br>• Push 이벤트 감지</div>
+                            <div class="component-tech">GitHub</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arrow-down">
+                    <span class="arrow-down-label">↓ Webhook Trigger</span>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">CI/CD Automation Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">GitHub Actions</div>
+                            <div class="component-desc">• .github/workflows/deploy.yml 실행<br>• 테스트 자동 실행<br>• 빌드 프로세스 시작</div>
+                            <div class="component-tech">.yml Workflow File</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arrow-down">
+                    <span class="arrow-down-label">↓</span>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">Build Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">Docker Build</div>
+                            <div class="component-desc">• Dockerfile 읽기<br>• 이미지 빌드 (myapp:v1.2.3)<br>• 태그 생성 (latest, commit SHA)</div>
+                            <div class="component-tech">Docker Engine</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arrow-down">
+                    <span class="arrow-down-label">↓ Docker Push</span>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">Registry Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">Docker Hub</div>
+                            <div class="component-desc">• 이미지 저장<br>• 버전 관리<br>• Pull 가능 상태</div>
+                            <div class="component-tech">Container Registry</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arrow-down">
+                    <span class="arrow-down-label">↓ kubectl set image</span>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">Deployment Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">Kubernetes Cluster</div>
+                            <div class="component-desc">• Rolling Update 시작<br>• 새 Pod 생성 (v1.2.3)<br>• 헬스체크 확인<br>• 기존 Pod 종료</div>
+                            <div class="component-tech">K8s Rolling Update</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-name">배포 모니터링</div>
+                            <div class="component-desc">• 배포 진행 상황<br>• 성공/실패 알림<br>• 롤백 가능</div>
+                            <div class="component-tech">Dashboard + Slack</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arrow-down">
+                    <span class="arrow-down-label">↓</span>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">Production Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">운영 중인 애플리케이션</div>
+                            <div class="component-desc">사용자는 무중단으로 새 버전 사용</div>
+                            <div class="component-tech">Live Service</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-description">
+                <strong>전체 소요 시간:</strong> 코드 푸시 → 2-3분 후 자동 배포 완료 | <strong>사람이 하는 일:</strong> 코드 작성 + Git Push만!
+            </div>
+
+            <div class="info-box">
+                <div class="info-item">
+                    <div class="info-label">학습 포인트</div>
+                    <div class="info-value">자동화, DevOps</div>
+                </div>
+            </div>
+
+            <div class="team-roles">
+                <div class="role-title">👥 역할 분담</div>
+                <div class="role-item">
+                    <div class="role-name">A</div>
+                    <div class="role-task">샘플 웹 애플리케이션 개발 (Flask 방명록 등)</div>
+                </div>
+                <div class="role-item">
+                    <div class="role-name">B</div>
+                    <div class="role-task">GitHub Actions 워크플로우 작성, Dockerfile 작성</div>
+                </div>
+                <div class="role-item">
+                    <div class="role-name">C</div>
+                    <div class="role-task">쿠버네티스 배포 스크립트, 모니터링 대시보드</div>
+                </div>
+            </div>
+
+            <div class="structure-summary">
+                <strong>전체 구조 요약:</strong> 애플리케이션 자체보다는 개발(Git)부터 배포(Kubernetes)까지의 과정을 자동화하는 DevOps 파이프라인 구조. 개발자가 코드를 GitHub에 푸시하면, GitHub Actions가 이를 감지하여 자동으로 Docker 이미지를 빌드하고 레지스트리에 푸시. 이후 쿠버네티스 클러스터에 새 이미지로 무중단 업데이트(Rolling Update)를 실행하여 배포 완료.
+            </div>
+        </div>
+
+        <!-- 프로젝트 4 -->
+        <div class="project-section" id="project-4">
+            <div class="project-header">4. MCP 서버 + Notion 관리 시스템</div>
+            <div class="project-subtitle">AI가 자연어를 이해하고 Notion 페이지를 자동 생성</div>
+            
+            <div class="architecture-flow">
+                <div class="layer">
+                    <div class="layer-title">User Interface Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">웹 UI</div>
+                            <div class="component-desc">• 텍스트 입력창<br>• 명령어 입력: "프로젝트 회의록 만들어줘"<br>• 결과 확인 링크</div>
+                            <div class="component-tech">React or HTML/CSS/JS</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arrow-down">
+                    <span class="arrow-down-label">↓ HTTP POST Request</span>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">Kubernetes Application Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">AI-Notion Bridge Service</div>
+                            <div class="component-desc">• POST /create - 명령 받기<br>• 요청 검증<br>• Gemini API 호출<br>• Notion API 호출<br>• 결과 반환</div>
+                            <div class="component-tech">Flask or FastAPI</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arrow-down">
+                    <span class="arrow-down-label">↓ API Call</span>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">AI Processing Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">Gemini API</div>
+                            <div class="component-desc">• 프롬프트: "다음 명령을 JSON으로 변환"<br>• 응답 예시:<br>{<br>  type: "page",<br>  title: "프로젝트 회의록",<br>  content: [{type: "heading", text: "안건"}]<br>}</div>
+                            <div class="component-tech">Google Gemini API</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arrow-down">
+                    <span class="arrow-down-label">↓ JSON Response</span>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">MCP Integration Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">Notion MCP Server</div>
+                            <div class="component-desc">• 오픈소스 MCP 서버 (GitHub)<br>• Gemini의 JSON을 Notion API 형식으로 변환<br>• API 인증 처리</div>
+                            <div class="component-tech">Python / Node.js (오픈소스)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arrow-down">
+                    <span class="arrow-down-label">↓ Notion API Call</span>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">Notion API Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">Notion Workspace</div>
+                            <div class="component-desc">• POST /v1/pages - 페이지 생성<br>• POST /v1/databases - DB 생성<br>• 실제 결과물 생성 완료</div>
+                            <div class="component-tech">Notion REST API</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arrow-down">
+                    <span class="arrow-down-label">↓</span>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-title">Monitoring Layer</div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-name">대시보드</div>
+                            <div class="component-desc">• API 호출 횟수<br>• 성공률 / 실패율<br>• 평균 응답 시간<br>• 생성된 페이지 목록</div>
+                            <div class="component-tech">Grafana or Custom UI</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-description">
+                <strong>데이터 흐름 예시:</strong> "회의록 만들어줘" → Gemini: {type:"page", title:"회의록", ...} → Notion MCP: API 변환 → Notion: 실제 페이지 생성 → 사용자: Notion에서 확인
+            </div>
+
+            <div class="team-roles">
+                <div class="role-title">👥 역할 분담</div>
+                <div class="role-item">
+                    <div class="role-name">A</div>
+                    <div class="role-task">프론트엔드 UI 및 AI-Notion 브릿지 서비스 개발</div>
+                </div>
+                <div class="role-item">
+                    <div class="role-name">B</div>
+                    <div class="role-task">Gemini API 연동 및 프롬프트 엔지니어링</div>
+                </div>
+                <div class="role-item">
+                    <div class="role-name">C</div>
+                    <div class="role-task">Notion MCP 서버 설정 및 Notion API 연동</div>
+                </div>
+            </div>
+
+            <div class="structure-summary">
+                <strong>전체 구조 요약:</strong> 사용자의 자연어 입력을 처리하여 외부 서비스(Notion)를 제어하는 API 중심의 연동 구조. 쿠버네티스에 배포된 브릿지 서비스가 사용자 요청을 받아 Gemini API를 호출해 자연어를 구조화된 데이터(JSON)로 변환. 이 데이터를 다시 Notion API가 이해할 수 있는 형식으로 가공하여 Notion에 페이지 생성을 요청하는 흐름.
+            </div>
+        </div>
+    </div>
+</body>
+</html>
